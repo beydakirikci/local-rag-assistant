@@ -1,0 +1,27 @@
+{
+  "name": "local-rag-assistant",
+  "version": "1.0.0",
+  "description": "A fully offline RAG-powered Q&A assistant using Microsoft Foundry Local",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "ingest": "node scripts/ingest.js",
+    "test": "node --test tests/",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "rag",
+    "foundry-local",
+    "offline-ai",
+    "chatbot",
+    "vector-search",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0",
+    "sql.js": "^1.11.0"
+  }
+}
