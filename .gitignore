@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Database
+data/*.db
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Foundry Local cache
+.foundry/
