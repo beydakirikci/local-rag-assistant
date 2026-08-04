@@ -6,7 +6,7 @@ const config = {
   host: '127.0.0.1',
 
   // Model — Foundry Local model identifier
-  model: 'phi-4',
+  model: 'qwen2.5-0.5b',
 
   // Chunking parameters
   chunkSize: 200,       // Target tokens per chunk (~200 words)
