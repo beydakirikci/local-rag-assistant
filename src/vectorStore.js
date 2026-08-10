@@ -169,13 +169,32 @@ export class VectorStore {
       return [];
     }
 
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
     const scored = this._rowCache.map(row => {
+      const semanticScore = cosineSimilarity(queryEmbedding, row.embedding);
+      
+      let keywordScore = 0;
+      const chunkText = row.content.toLowerCase();
+      if (queryWords.length > 0) {
+        let matchCount = 0;
+        for (const word of queryWords) {
+          if (chunkText.includes(word)) {
+            matchCount++;
+          }
+        }
+        keywordScore = matchCount / queryWords.length;
+      }
+      
+      // Hybrid weighting: 75% semantic, 25% keyword
+      const finalScore = (semanticScore * 0.75) + (keywordScore * 0.25);
+
       return {
         content: row.content,
         source: row.source,
         category: row.category,
         chunkIndex: row.chunkIndex,
-        score: cosineSimilarity(queryEmbedding, row.embedding)
+        score: finalScore
       };
     });
 
@@ -199,6 +218,13 @@ export class VectorStore {
 
   clearHistory() {
     this.db.run('DELETE FROM chat_history');
+    this._save();
+  }
+
+  // --- Document Management ---
+  deleteDocument(source) {
+    this.db.run('DELETE FROM chunks WHERE source = ?', [source]);
+    this._rowCache = null;
     this._save();
   }
 

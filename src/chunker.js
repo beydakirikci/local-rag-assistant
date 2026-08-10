@@ -5,6 +5,7 @@ import { readFileSync, readdirSync } from 'fs';
 import { join, basename, extname } from 'path';
 import config from './config.js';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import * as cheerio from 'cheerio';
 
 /**
  * Parse optional YAML front-matter from markdown content
@@ -72,6 +73,43 @@ function smartSplit(text, maxLen = 800, overlap = 150) {
   }
 
   return chunks;
+}
+
+/**
+ * Fetch and chunk content from a URL
+ * @param {string} url - The URL to fetch
+ * @returns {Promise<{ source: string, category: string, chunks: string[] }>}
+ */
+export async function chunkUrl(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to fetch URL: ${response.status}`);
+  
+  const html = await response.text();
+  const $ = cheerio.load(html);
+  
+  // Remove scripts, styles, and non-content elements
+  $('script, style, noscript, nav, footer, header, aside').remove();
+  
+  let title = $('title').text() || url;
+  title = title.replace(/\s+/g, ' ').trim();
+  
+  // Get text from body
+  let content = $('body').text();
+  
+  // Clean up content (remove excessive newlines and spaces)
+  content = content.replace(/\n\s*\n/g, '\n\n').replace(/[ \t]+/g, ' ').trim();
+  
+  if (content.length < 50) {
+    throw new Error('Not enough readable text found on this webpage.');
+  }
+
+  const chunks = smartSplit(content, 800, 150);
+
+  return {
+    source: title,
+    category: 'Web',
+    chunks
+  };
 }
 
 /**

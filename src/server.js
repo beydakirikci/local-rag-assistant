@@ -157,6 +157,47 @@ app.post('/api/upload', async (req, res) => {
   }
 });
 
+// --- API: Delete document ---
+app.delete('/api/documents/:id', (req, res) => {
+  try {
+    const source = req.params.id;
+    engine.vectorStore.deleteDocument(source);
+    res.json({ success: true, message: `Document "${source}" deleted` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- API: Upload URL ---
+app.post('/api/upload-url', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL is required' });
+
+    const { chunkUrl } = await import('./chunker.js');
+    const { source, category, chunks } = await chunkUrl(url);
+
+    const chunkObjects = chunks.map((c, i) => ({
+      content: c,
+      source,
+      category,
+      chunkIndex: i,
+      totalChunks: chunks.length
+    }));
+
+    await engine.vectorStore.addChunks(chunkObjects);
+
+    res.json({
+      success: true,
+      message: `Website "${source}" processed and indexed`,
+      chunks: chunks.length
+    });
+  } catch (error) {
+    console.error('URL processing error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // --- API: Clear chat history ---
 app.post('/api/clear', (req, res) => {
   engine.clearHistory();

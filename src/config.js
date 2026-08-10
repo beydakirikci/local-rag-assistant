@@ -13,7 +13,7 @@ const config = {
   chunkOverlap: 25,     // Overlap tokens between chunks to prevent info loss
 
   // Retrieval
-  topK: 3,              // Number of top chunks to retrieve per query
+  topK: 7,              // Number of top chunks to retrieve per query
 
   // Paths
   docsDir: 'docs',

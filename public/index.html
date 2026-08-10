@@ -841,6 +841,7 @@
       }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -1092,12 +1093,19 @@
       msg.className = `message ${role}`;
 
       const avatar = role === 'user' ? '👤' : '🤖';
-      const roleLabel = role === 'user' ? 'You' : 'Assistant';
+      const roleLabel = role === 'user' ? 'Siz' : 'Asistan';
+      
+      let ttsBtn = '';
+      if (role === 'assistant') {
+        ttsBtn = `<button onclick="speakText(this.parentElement.parentElement.querySelector('.message-content').innerText, this)" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:16px; margin-left: 8px;" title="Sesli Oku">🔊</button>`;
+      }
 
       msg.innerHTML = `
         <div class="message-avatar">${avatar}</div>
         <div class="message-body">
-          <div class="message-role">${roleLabel}</div>
+          <div class="message-role" style="display: flex; align-items: center;">
+            ${roleLabel} ${ttsBtn}
+          </div>
           <div class="message-content">${isStreaming ?
             '<div class="typing-indicator"><span></span><span></span><span></span></div>' :
             formatMarkdown(content)
@@ -1149,7 +1157,9 @@
     // ═══ MARKDOWN FORMATTING ═══
     function formatMarkdown(text) {
       if (!text) return '';
-
+      if (typeof marked !== 'undefined') {
+        return marked.parse(text);
+      }
       return text
         // Code blocks
         .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
